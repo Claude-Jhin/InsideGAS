@@ -6,6 +6,8 @@
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
 #include "GameFramework/Character.h"
+#include "InsideGAS/InsideGAS.h"
+#include "InsideGAS/Ability/EnhancedAbilitySystemComponent.h"
 #include "GASCharacterBase.generated.h"
 
 UCLASS()
@@ -15,7 +17,8 @@ class INSIDEGAS_API AGASCharacterBase : public ACharacter, public IAbilitySystem
 
 public:
 	// Sets default values for this character's properties
-	AGASCharacterBase();
+	AGASCharacterBase(const FObjectInitializer& ObjectInitializer);
+
 	virtual void PossessedBy(AController* NewController) override;
 public:
 	FORCEINLINE virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
@@ -24,8 +27,14 @@ public:
 	}
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UAbilitySystemComponent* AbilitySystemComponent;
 
 	static FName AbilitySystemComponentName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
+	TMap<EGASAbilityInputID, TSubclassOf<UGameplayAbility>> OldInputDefaultAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
+	TMap<UInputAction*, TSubclassOf<UGameplayAbility>> EnhancedInputDefaultAbilities;
 };

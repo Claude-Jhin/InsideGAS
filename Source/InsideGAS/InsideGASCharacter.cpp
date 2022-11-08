@@ -1,6 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "InsideGASCharacter.h"
+
+#include "AbilitySystemComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -11,7 +15,9 @@
 //////////////////////////////////////////////////////////////////////////
 // AInsideGASCharacter
 
-AInsideGASCharacter::AInsideGASCharacter()
+AInsideGASCharacter::AInsideGASCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UEnhancedAbilitySystemComponent>(
+		AGASCharacterBase::AbilitySystemComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -44,7 +50,8 @@ AInsideGASCharacter::AInsideGASCharacter()
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -75,6 +82,31 @@ void AInsideGASCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AInsideGASCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AInsideGASCharacter::TouchStopped);
+
+	if (IsValid(AbilitySystemComponent))
+	{
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent,
+		                                                              FGameplayAbilityInputBinds(
+			                                                              FString(), FString(),
+			                                                              FString("EGASAbilityInputID"), -1, -1));
+	}
+
+	EnhancedAbilitySystemComponent = Cast<UEnhancedAbilitySystemComponent>(AbilitySystemComponent);
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = GetController<APlayerController>()->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
+	
+	if (DefaultInputMappingContext)
+	{
+		Subsystem->AddMappingContext(DefaultInputMappingContext, InputPriority);
+	}
+	
+	if (IsValid(EnhancedAbilitySystemComponent) && IsValid(EnhancedInputComponent))
+	{
+		EnhancedAbilitySystemComponent->BindAbilityActivationToInputComponent(
+			EnhancedInputComponent, EnhancedInputDefaultAbilities);
+	}
 }
 
 void AInsideGASCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -115,12 +147,12 @@ void AInsideGASCharacter::MoveForward(float Value)
 
 void AInsideGASCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction

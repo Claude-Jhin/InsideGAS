@@ -13,7 +13,8 @@ public class InsideGAS : ModuleRules
 		{
 			"GameplayAbilities",
 			"GameplayTasks",
-			"GameplayTags"
+			"GameplayTags",
+			"EnhancedInput"
 		});
 	}
 }

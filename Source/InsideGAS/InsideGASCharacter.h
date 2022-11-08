@@ -18,15 +18,15 @@ class AInsideGASCharacter : public AGASCharacterBase
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
-	AInsideGASCharacter();
+	AInsideGASCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
 protected:
-
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
@@ -61,5 +61,15 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-};
 
+	FORCEINLINE UEnhancedAbilitySystemComponent* GetEnhancedAbilitySystemComponent() const
+	{
+		return EnhancedAbilitySystemComponent;
+	}
+
+	UPROPERTY(EditDefaultsOnly, Category = "GAS|Binding")
+	UInputMappingContext* DefaultInputMappingContext;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	UEnhancedAbilitySystemComponent* EnhancedAbilitySystemComponent;
+};
