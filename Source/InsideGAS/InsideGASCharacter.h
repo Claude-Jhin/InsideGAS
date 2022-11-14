@@ -68,7 +68,7 @@ public:
 	}
 
 	UPROPERTY(EditDefaultsOnly, Category = "GAS|Binding")
-	UInputMappingContext* DefaultInputMappingContext;
+	class UInputMappingContext* DefaultInputMappingContext;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UEnhancedAbilitySystemComponent* EnhancedAbilitySystemComponent;
