@@ -52,6 +52,7 @@ protected:
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
 protected:
+	virtual void PossessedBy(AController* NewController) override;
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
@@ -72,4 +73,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UEnhancedAbilitySystemComponent* EnhancedAbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
+	TMap<EGASAbilityInputID, TSubclassOf<UGameplayAbility>> OldInputDefaultAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
+	TMap<UInputAction*, TSubclassOf<UGameplayAbility>> EnhancedInputDefaultAbilities;
 };

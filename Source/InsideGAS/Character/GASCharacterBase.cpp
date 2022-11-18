@@ -7,16 +7,7 @@
 
 FName AGASCharacterBase::AbilitySystemComponentName(TEXT("AbilitySystemComponent"));
 
-namespace AbilityInputBindingComponent_Impl
-{
-	constexpr int32 InvalidInputID = 10;
-	int32 IncrementingInputID = InvalidInputID;
 
-	static int32 GetNextInputID()
-	{
-		return ++IncrementingInputID;
-	}
-}
 
 // Sets default values
 AGASCharacterBase::AGASCharacterBase(const FObjectInitializer& ObjectInitializer)
@@ -38,21 +29,6 @@ void AGASCharacterBase::PossessedBy(AController* NewController)
 	if (IsValid(AbilitySystemComponent))
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-
-		if (GetLocalRole() == ROLE_Authority)
-		{
-			for (TTuple<EGASAbilityInputID, TSubclassOf<UGameplayAbility>>& Ability : OldInputDefaultAbilities)
-			{
-				AbilitySystemComponent->GiveAbility(
-					FGameplayAbilitySpec(Ability.Value, 1, static_cast<int32>(Ability.Key), this));
-			}
-
-			for (auto& Ability : EnhancedInputDefaultAbilities)
-			{
-				using namespace AbilityInputBindingComponent_Impl;
-				AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability.Value, 1, GetNextInputID(), this));
-			}
-		}
 
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).AddUObject(
 			this, &AGASCharacterBase::OnHealthChanged);

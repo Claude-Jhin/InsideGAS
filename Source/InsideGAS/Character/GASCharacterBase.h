@@ -39,12 +39,6 @@ protected:
 
 	static FName AbilitySystemComponentName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
-	TMap<EGASAbilityInputID, TSubclassOf<UGameplayAbility>> OldInputDefaultAbilities;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS|Binding")
-	TMap<UInputAction*, TSubclassOf<UGameplayAbility>> EnhancedInputDefaultAbilities;
-
 	UPROPERTY()
 	UGASAttributeSet* AttributeSet;
 

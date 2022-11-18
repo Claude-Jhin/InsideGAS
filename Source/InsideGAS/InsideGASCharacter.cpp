@@ -12,6 +12,17 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+namespace AbilityInputBindingComponent_Impl
+{
+	constexpr int32 InvalidInputID = 10;
+	int32 IncrementingInputID = InvalidInputID;
+
+	static int32 GetNextInputID()
+	{
+		return ++IncrementingInputID;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // AInsideGASCharacter
 
@@ -117,6 +128,29 @@ void AInsideGASCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Lo
 void AInsideGASCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	StopJumping();
+}
+
+void AInsideGASCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (IsValid(AbilitySystemComponent))
+	{
+		if (GetLocalRole() == ROLE_Authority)
+		{
+			for (TTuple<EGASAbilityInputID, TSubclassOf<UGameplayAbility>>& Ability : OldInputDefaultAbilities)
+			{
+				AbilitySystemComponent->GiveAbility(
+					FGameplayAbilitySpec(Ability.Value, 1, static_cast<int32>(Ability.Key), this));
+			}
+
+			for (auto& Ability : EnhancedInputDefaultAbilities)
+			{
+				using namespace AbilityInputBindingComponent_Impl;
+				AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability.Value, 1, GetNextInputID(), this));
+			}
+		}
+	}
 }
 
 void AInsideGASCharacter::TurnAtRate(float Rate)
